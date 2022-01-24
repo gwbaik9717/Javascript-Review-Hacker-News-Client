@@ -1,4 +1,3 @@
-const content = document.createElement('div');
 const container = document.getElementById('root');
 const ajax = new XMLHttpRequest();
 const NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
@@ -10,32 +9,44 @@ function getData(url){
     return JSON.parse(ajax.response);
 }
 
-const newsFeed = getData(NEWS_URL);
+function newsFeed(){
+    const newsFeed = getData(NEWS_URL);
+    const newsList = [];
+    newsList.push('<ul>');
+    
+    for(let i=0; i < 10; i++){
+        newsList.push(`
+        <li>
+          <a href="#${newsFeed[i].id}">${newsFeed[i].title} (${newsFeed[i].comments_count})</a>
+        </li>`);
+    }
+    
+    newsList.push('<ul>');
+    container.innerHTML = newsList.join('');
+}
 
-const ul = document.createElement('ul');
-
-window.addEventListener('hashchange', () => {
+function newsDetail() {
     const id = location.hash.substring(1);
     const newsContent = getData(CONTENT_URL.replace('@id', id));
-    const title = document.createElement('h1');
-    title.innerHTML = newsContent.title;
 
-    content.appendChild(title);
-
-});
-
-for(let i=0; i < 10; i++){
-    const div = document.createElement('div');
-    
-    div.innerHTML = `
-    <li>
-      <a href="#${newsFeed[i].id}">${newsFeed[i].title} (${newsFeed[i].comments_count})</a>
-    </li>
-    `;
-
-    ul.appendChild(div.firstElementChild);
+    const template = `
+    <h1>${newsContent.title}</h1>
+    <div><a href="#">목록으로</a></div>
+    `
+    container.innerHTML = template;
 }
 
 
-container.appendChild(ul);
-container.appendChild(content);
+function router(){
+    const routePath = location.hash;
+    if(routePath === ''){
+        newsFeed();
+    }else{
+        newsDetail();
+    }
+}
+
+window.addEventListener('hashchange', router);
+
+router();
+
